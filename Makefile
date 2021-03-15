@@ -1,34 +1,21 @@
-PROGRAM = siweb
-ARGUMENTS =
+SRC_DIR := ./src
+OBJ_DIR := ./obj
+BIN_DIR := ./bin
+PROGRAM := siweb
+SRC_FILES := $(wildcard $(SRC_DIR)/*.cpp)
+OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC_FILES))
+LDFLAGS :=
+CPPFLAGS :=
+CXXFLAGS := -MMD
+-include $(OBJ_FILES:.o=.d)
 
-CC = clang++ # use C compiler
-CPPFLAGS = -O3 -fopenmp # use C++ standard
+$(PROGRAM): $(OBJ_FILES)
+	g++ $(LDFLAGS) -o $@ $^
 
-LD = clang++ # use C linker
-LDFLAGS = -lpthread -lgomp
-
-CFILES = src/$(wildcard *.cpp) # collect c files
-OFILES = build/$(CFILES:.cpp=.o)
-
-all: clean depend $(PROGRAM)
-
-$(PROGRAM): $(OFILES)
-	$(LD) -o $@ $(OFILES) $(LDFLAGS)
-
-.PHONY: all clean
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	g++ $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OFILES) $(PROGRAM) .depend
-
-run: $(PROGRAM)
-	./build/$(PROGRAM) $(ARGUMENTS)
-
-debug: $(PROGRAM)
-	gdb build/$(PROGRAM) $(ARGUMENTS)
-
-DEPENDFILE = .depend
-
-depend:
-	$(CC) $(CCFLAGS) -MM $(CFILES) > $(DEPENDFILE)
-
--include $(DEPENDFILE)
+	rm -f $(OBJ_FILES)
+	rm -f $(OBJ_FILES:.o=.d)
+	rm -f $(PROGRAM)

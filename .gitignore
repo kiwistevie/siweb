@@ -1,6 +1,8 @@
 .vscode/
-build/
+obj/
+bin/
 *.o
+*.d
 *.depend
 .depend
 siweb
