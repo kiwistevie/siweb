@@ -10,14 +10,11 @@
 #define READ_BUFFER_SIZE 32
 
 void server_process(int fd, const context& ctx) {
-    std::cout << "Got request from " << ctx.ip_addr << " and port " << ctx.port
-              << std::endl;
-
     int ret;
     char buff[READ_BUFFER_SIZE];
     std::ostringstream input;
 
-    HttpParser parser;
+    httpParser parser;
     while (true) {
         if ((ret = recv(fd, buff, sizeof(buff), 0)) > 0) {
             parser.parse(std::string(buff, buff + ret));
@@ -28,6 +25,10 @@ void server_process(int fd, const context& ctx) {
             exit(0);
         }
     }
+
+    std::cout << ctx.ip_addr << ":" << ctx.port << " "
+              << http::HttpMethodToString(parser.get_method()) << " "
+              << parser.get_uri() << std::endl;
 
     input << "<html><body><h1>Hello</h1></body></html>";
 

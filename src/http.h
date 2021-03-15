@@ -3,11 +3,27 @@
 
 #include <string>
 
-struct HttpHeader {
+struct httpHeader {
     std::string identifier;
     std::string value;
 };
 
-enum HttpMethod { GET, POST, UPDATE, PUT, DELETE };
+enum httpMethod { GET, POST, UPDATE, PUT, DELETE };
+
+class http {
+   public:
+    static std::string HttpMethodToString(const httpMethod& method) {
+        switch (method) {
+            case httpMethod::GET:
+                return "GET";
+            case httpMethod::POST:
+                return "POST";
+            case httpMethod::DELETE:
+                return "DELETE";
+            default:
+                return "NOT IMPLEMENTED";
+        }
+    }
+};
 
 #endif

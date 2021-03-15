@@ -2,6 +2,7 @@ SRC_DIR := ./src
 OBJ_DIR := ./obj
 BIN_DIR := ./bin
 PROGRAM := siweb
+PORT := 8080
 SRC_FILES := $(wildcard $(SRC_DIR)/*.cpp)
 OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC_FILES))
 LDFLAGS :=
@@ -19,3 +20,6 @@ clean:
 	rm -f $(OBJ_FILES)
 	rm -f $(OBJ_FILES:.o=.d)
 	rm -f $(PROGRAM)
+
+run: $(PROGRAM)
+	./$(PROGRAM) $(PORT)

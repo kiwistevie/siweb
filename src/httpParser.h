@@ -6,7 +6,7 @@
 #include "http.h"
 #include "utils.h"
 
-class HttpParser {
+class httpParser {
    public:
     void parse(const std::string& input) {
         if (complete)
@@ -28,11 +28,11 @@ class HttpParser {
         }
     }
 
-    const std::vector<HttpHeader>& get_headers() const { return headers; }
+    const std::vector<httpHeader>& get_headers() const { return headers; }
 
     std::string get_body() const { return body.str(); }
 
-    HttpMethod get_method() const { return method; }
+    httpMethod get_method() const { return method; }
 
     std::string get_uri() const { return uri; }
 
@@ -43,15 +43,15 @@ class HttpParser {
     bool parse_body = false;
     int body_size = 0;
     std::ostringstream body;
-    std::vector<HttpHeader> headers;
+    std::vector<httpHeader> headers;
     std::ostringstream curr;
 
     bool method_uri_parsed = false;
-    HttpMethod method;
+    httpMethod method;
     std::string uri;
 
     void parse_header(const std::string& line) {
-        HttpHeader header;
+        httpHeader header;
         std::ostringstream identifier;
         std::ostringstream value;
         bool delim = false;
@@ -93,9 +93,9 @@ class HttpParser {
 
         std::string m = method.str();
         if (m == "GET")
-            this->method = HttpMethod::GET;
+            this->method = httpMethod::GET;
         else if (m == "POST")
-            this->method = HttpMethod::POST;
+            this->method = httpMethod::POST;
 
         this->uri = uri.str();
     }
@@ -104,7 +104,7 @@ class HttpParser {
         if (line.length() == 0) {
             auto it =
                 std::find_if(std::begin(headers), std::end(headers),
-                             [](const HttpHeader& header) {
+                             [](const httpHeader& header) {
                                  return header.identifier == "Content-Length";
                              });
             if (it != std::end(headers)) {
