@@ -127,7 +127,8 @@ int server_start(int argc, char* argv[]) {
   install_childterm_signal();
 
   while (1) {
-    if (num_forks > MAX_FORKS) continue;
+    if (num_forks > MAX_FORKS)
+      continue;
     peer_addr_len = sizeof(struct sockaddr_storage);
     int cfd = accept(sfd, (struct sockaddr*)&peer_addr, &peer_addr_len);
 
