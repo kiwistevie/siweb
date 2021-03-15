@@ -4,8 +4,8 @@
 #include <string>
 
 struct HttpHeader {
-  std::string identifier;
-  std::string value;
+    std::string identifier;
+    std::string value;
 };
 
 enum HttpMethod { GET, POST, UPDATE, PUT, DELETE };
