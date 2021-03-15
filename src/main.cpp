@@ -1,51 +1,31 @@
 #include <sys/socket.h>
 #include <unistd.h>
+#include <fstream>
 #include <iostream>
 #include <sstream>
+#include <streambuf>
 #include "context.h"
 #include "server.h"
 
+#include <memory>
 #include "httpParser.h"
+#include "request.h"
+#include "router.h"
 
-#define READ_BUFFER_SIZE 32
-
-void server_process(int fd, const context& ctx) {
-    int ret;
-    char buff[READ_BUFFER_SIZE];
-    std::ostringstream input;
-
-    httpParser parser;
-    while (true) {
-        if ((ret = recv(fd, buff, sizeof(buff), 0)) > 0) {
-            parser.parse(std::string(buff, buff + ret));
-            if (parser.is_message_complete()) {
-                break;
-            }
-        } else {
-            exit(0);
-        }
-    }
-
-    std::cout << ctx.ip_addr << ":" << ctx.port << " "
-              << http::HttpMethodToString(parser.get_method()) << " "
-              << parser.get_uri() << std::endl;
-
-    input << "<html><body><h1>Hello</h1></body></html>";
-
-    std::ostringstream oss;
-    oss << "HTTP/1.1 200 OK" << std::endl;
-    oss << "Server: SiWeb/0.0.1 (Unix)" << std::endl;
-    oss << "Content-Length: " << input.str().length() << std::endl;
-    oss << "Content-Type: text/html" << std::endl;
-    oss << "Connection: Closed" << std::endl;
-    oss << std::endl;
-    oss << input.str();
-
-    std::string response = oss.str();
-    write(fd, response.c_str(), response.length());
-    close(fd);
-}
+using namespace siweb::http;
 
 int main(int argc, char* argv[]) {
-    server_start(argc, argv);
+    router rtr;
+    std::unique_ptr<route> rt = std::make_unique<lambda_route>(
+        [](const request& req) { return true; },
+        [](const request& req) {
+            std::ifstream t(req.get_uri().substr(1));
+            std::string str((std::istreambuf_iterator<char>(t)),
+                            std::istreambuf_iterator<char>());
+            return response(str.c_str(), str.length(), httpStatusCode::Ok);
+        });
+
+    rtr.add_route(std::move(rt));
+    siweb_server server(rtr);
+    server.start(argc, argv);
 }

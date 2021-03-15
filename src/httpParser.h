@@ -6,6 +6,7 @@
 #include "http.h"
 #include "utils.h"
 
+namespace siweb::http {
 class httpParser {
    public:
     void parse(const std::string& input) {
@@ -133,5 +134,6 @@ class httpParser {
             complete = true;
     }
 };
+}  // namespace siweb::http
 
 #endif

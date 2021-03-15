@@ -1,3 +1,4 @@
+#include "server.h"
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/socket.h>
@@ -5,11 +6,15 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <cstring>
+#include <iostream>
 #include <string>
-
 #include "context.h"
+#include "httpParser.h"
 
 #define MAX_FORKS 16
+#define READ_BUFFER_SIZE 32
+
+using namespace siweb::http;
 
 extern void server_process(int fd, const context& ctx);
 static void waiter(int pid);
@@ -66,7 +71,49 @@ static void waiter(int pid) {
     num_forks--;
 }
 
-int server_start(int argc, char* argv[]) {
+void siweb_server::server_process(int fd, context ctx) {
+    int ret;
+    char buff[READ_BUFFER_SIZE];
+    std::ostringstream input;
+
+    httpParser parser;
+    while (true) {
+        if ((ret = recv(fd, buff, sizeof(buff), 0)) > 0) {
+            parser.parse(std::string(buff, buff + ret));
+            if (parser.is_message_complete()) {
+                break;
+            }
+        } else {
+            exit(0);
+        }
+    }
+
+    request req(parser.get_method(), parser.get_uri(), ctx.ip_addr);
+    auto resp = this->rtr.route(req);
+
+    std::cout << req.get_client_ip() << " "
+              << http::HttpMethodToString(req.get_method()) << " "
+              << req.get_uri() << " -> " << (int)resp.get_status_code() << " "
+              << http::HttpStatusCodeToString(resp.get_status_code())
+              << std::endl;
+
+    input << resp.get_string();
+
+    std::ostringstream oss;
+    oss << "HTTP/1.1 " << (int)resp.get_status_code()
+        << http::HttpStatusCodeToString(resp.get_status_code()) << std::endl;
+    for (auto& header : resp.get_headers()) {
+        oss << header.identifier << ": " << header.value << std::endl;
+    }
+    oss << std::endl;
+    oss << input.str();
+
+    std::string response = oss.str();
+    write(fd, response.c_str(), response.length());
+    close(fd);
+}
+
+int siweb_server::start(int argc, char* argv[]) {
     struct addrinfo hints;
     struct addrinfo *result, *rp;
     int sfd, s;
@@ -123,7 +170,7 @@ int server_start(int argc, char* argv[]) {
         fprintf(stderr, "Listen failed ... \n");
         exit(0);
     } else {
-        printf("Listening on port %s ... \n", argv[0]);
+        printf("Listening on port %s ... \n", argv[1]);
     }
 
     install_childterm_signal();
