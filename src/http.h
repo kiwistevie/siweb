@@ -1,13 +1,10 @@
 #ifndef siweb_http_h
 #define siweb_http_h
 
+#include <map>
 #include <string>
 
 namespace siweb::http {
-struct httpHeader {
-    std::string identifier;
-    std::string value;
-};
 
 enum httpMethod { GET, POST, UPDATE, PUT, DELETE };
 enum httpStatusCode { Ok = 200, NotFound = 404 };
@@ -38,7 +35,9 @@ class http {
                 return "NotFound";
         }
     }
-};
+
+    static std::map<std::string, std::string> content_type_mappings;
+};  // namespace siweb::http
 }  // namespace siweb::http
 
 #endif

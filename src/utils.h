@@ -2,8 +2,10 @@
 #define siweb_utils_h
 
 #include <algorithm>
+#include <sstream>
 #include <string>
 
+namespace siweb::utils {
 // trim from start (in place)
 inline void ltrim(std::string& s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
@@ -42,5 +44,21 @@ inline std::string trim_copy(std::string s) {
     trim(s);
     return s;
 }
+
+inline std::string get_file_extension(std::string file) {
+    std::ostringstream oss;
+    for (int i = file.length() - 1; i >= 0; i--) {
+        if (file[i] == '.') {
+            oss << file[i];
+            break;
+        }
+        oss << file[i];
+    }
+
+    std::string out = oss.str();
+    std::reverse(std::begin(out), std::end(out));
+    return out;
+}
+}  // namespace siweb::utils
 
 #endif

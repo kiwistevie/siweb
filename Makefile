@@ -11,10 +11,10 @@ CXXFLAGS := -MMD
 -include $(OBJ_FILES:.o=.d)
 
 $(PROGRAM): $(OBJ_FILES)
-	g++ $(LDFLAGS) -o $@ $^
+	g++ -std=c++17 $(LDFLAGS) -o $@ $^
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	g++ $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
+	g++ -std=c++17 $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 clean:
 	rm -f $(OBJ_FILES)

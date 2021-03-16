@@ -9,10 +9,10 @@
 #include <iostream>
 #include <string>
 #include "context.h"
-#include "httpParser.h"
+#include "http_parser.h"
 
 #define MAX_FORKS 16
-#define READ_BUFFER_SIZE 32
+#define READ_BUFFER_SIZE 64
 
 using namespace siweb::http;
 
@@ -76,7 +76,7 @@ void siweb_server::server_process(int fd, context ctx) {
     char buff[READ_BUFFER_SIZE];
     std::ostringstream input;
 
-    httpParser parser;
+    http_parser parser;
     while (true) {
         if ((ret = recv(fd, buff, sizeof(buff), 0)) > 0) {
             parser.parse(std::string(buff, buff + ret));
@@ -89,6 +89,7 @@ void siweb_server::server_process(int fd, context ctx) {
     }
 
     request req(parser.get_method(), parser.get_uri(), ctx.ip_addr);
+	req.set_body(parser.get_body());
     auto resp = this->rtr.route(req);
 
     std::cout << req.get_client_ip() << " "
@@ -101,12 +102,17 @@ void siweb_server::server_process(int fd, context ctx) {
 
     std::ostringstream oss;
     oss << "HTTP/1.1 " << (int)resp.get_status_code()
+	    << " "
         << http::HttpStatusCodeToString(resp.get_status_code()) << std::endl;
     for (auto& header : resp.get_headers()) {
-        oss << header.identifier << ": " << header.value << std::endl;
+        oss << header.first << ": " << header.second << std::endl;
     }
+	
     oss << std::endl;
-    oss << input.str();
+	
+	if (input.str().length() > 0) {
+		oss << input.str();
+	}
 
     std::string response = oss.str();
     write(fd, response.c_str(), response.length());

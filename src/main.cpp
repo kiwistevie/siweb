@@ -8,24 +8,22 @@
 #include "server.h"
 
 #include <memory>
-#include "httpParser.h"
 #include "request.h"
 #include "router.h"
+#include "file_route.h"
 
 using namespace siweb::http;
 
 int main(int argc, char* argv[]) {
     router rtr;
     std::unique_ptr<route> rt = std::make_unique<lambda_route>(
-        [](const request& req) { return true; },
+        [](const request& req) { return req.get_uri() == "/test"; },
         [](const request& req) {
-            std::ifstream t(req.get_uri().substr(1));
-            std::string str((std::istreambuf_iterator<char>(t)),
-                            std::istreambuf_iterator<char>());
-            return response(str.c_str(), str.length(), httpStatusCode::Ok);
+            return response(req.get_body().c_str(), req.get_body().length(), httpStatusCode::Ok);
         });
 
-    rtr.add_route(std::move(rt));
+    rtr.add_route(std::make_unique<file_route>("/src/", ""));
+	rtr.add_route(std::move(rt));
     siweb_server server(rtr);
     server.start(argc, argv);
 }
