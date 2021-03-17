@@ -1,43 +1,53 @@
 #ifndef siweb_httpParser_h
 #define siweb_httpParser_h
+#include <map>
 #include <sstream>
 #include <string>
-#include <map>
 #include "http.h"
 #include "utils.h"
 
 namespace siweb::http {
 class http_parser {
-	using header_map = std::map<std::string, std::string>;
-	
+    using header_map = std::map<std::string, std::string>;
+
    public:
     void parse(const std::string& input);
     inline const header_map& get_headers() const { return headers; }
-    inline std::string get_body() const { return body.str(); }
-    inline httpMethod get_method() const { return method; }
-    inline std::string get_uri() const { return uri; }
-    inline bool is_message_complete() const { return state_complete; }
+    inline std::string get_body() const noexcept { return body; }
+    inline httpMethod get_method() const noexcept { return method; }
+    inline std::string get_uri() const noexcept { return uri; }
+    inline bool is_message_complete() const noexcept { return state_complete; }
 
    private:
-    std::ostringstream curr;
-	std::ostringstream body;
-	
-	header_map headers;
+    std::string input{""};
+    int start{0};
+    int current{0};
+
+    header_map headers;
     httpMethod method;
     std::string uri;
-	
-	bool state_body = false;
-	bool state_method_uri = false;
-	bool state_complete = false;
+    std::string body;
 
-    void parse_header(const std::string& line);
-	void parse_body(const std::string& line);
-    void parse_method_uri(const std::string& line);
-	void parse_method(const char* str);
-	void parse_uri(const char* str);
-    void parse_line(const std::string& line);
-	void parse_header_impl(const char* str);
-	int get_content_length();
+    bool state_body = false;
+    bool state_method_uri = true;
+    bool state_complete = false;
+
+    void parse();
+    void parse_method();
+    void parse_uri();
+    void parse_header();
+    void panic();
+
+    bool isAlpha(char c);
+    bool isDigit(char c);
+    bool isAtEnd();
+    char advance();
+    char peek();
+    char peekNext();
+    bool match(char expected);
+    void skipWhitespace();
+    std::string makeString();
+    int get_content_length();
 };
 }  // namespace siweb::http
 

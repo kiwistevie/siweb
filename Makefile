@@ -6,7 +6,7 @@ PORT := 8080
 SRC_FILES := $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.cpp))
 OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC_FILES))
 LDFLAGS :=
-CPPFLAGS :=
+CPPFLAGS := -DDEBUG -g
 CXXFLAGS := -MMD
 -include $(OBJ_FILES:.o=.d)
 

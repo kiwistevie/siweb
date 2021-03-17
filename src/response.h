@@ -52,18 +52,18 @@ class response {
         headers[key] = value;
     }
 
-    void unset_header(std::string key) {
-        headers.erase(key);
-    }
+    void unset_header(std::string key) { headers.erase(key); }
 
-    const std::map<std::string, std::string>& get_headers() const { return headers; }
+    const std::map<std::string, std::string>& get_headers() const {
+        return headers;
+    }
 
    private:
     std::vector<char> chars;
     siweb::http::httpStatusCode status_code;
     std::string content_type;
     std::map<std::string, std::string> headers{{"Server", "SiWeb/0.0.1 (Unix)"},
-                                    {"Connection", "Closed"}};
+                                               {"Connection", "Closed"}};
 };
 }  // namespace siweb::http
 
