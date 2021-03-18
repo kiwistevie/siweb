@@ -8,11 +8,14 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include "color.h"
 #include "context.h"
+#include "debug.h"
 #include "http_parser.h"
+#include "log.h"
 
 #define MAX_FORKS 16
-#define READ_BUFFER_SIZE 32
+#define READ_BUFFER_SIZE 1024
 
 using namespace siweb::http;
 
@@ -64,7 +67,7 @@ static void waiter(int pid) {
     int child_pid, status_code;
     child_pid = wait(&status_code);
     if (child_pid == -1) {
-        fprintf(stderr, "Error while waiting for child\n");
+        DEBUG_ERROR("Error while waiting for child\n");
     } else {
         install_childterm_signal();
     }
@@ -72,11 +75,15 @@ static void waiter(int pid) {
 }
 
 void siweb_server::server_process(int fd, context ctx) {
+    DEBUG_INFO(
+        "---------------------------- PROCESSING REQUEST "
+        "----------------------------");
     int ret;
     char buff[READ_BUFFER_SIZE];
     std::ostringstream input;
 
     http_parser parser;
+    DEBUG_INFO("Reading data from client ...");
     while (true) {
         if ((ret = recv(fd, buff, sizeof(buff), 0)) > 0) {
             parser.parse(std::string(buff, buff + ret));
@@ -88,15 +95,18 @@ void siweb_server::server_process(int fd, context ctx) {
         }
     }
 
+    DEBUG_INFO("Generating request object ...");
     request req(parser.get_method(), parser.get_uri(), ctx.ip_addr);
     req.set_body(parser.get_body());
+
+    DEBUG_INFO("Routing request and generating response ...");
     auto resp = this->rtr.route(req);
 
-    std::cout << req.get_client_ip() << " "
-              << http::HttpMethodToString(req.get_method()) << " "
-              << req.get_uri() << " -> " << (int)resp.get_status_code() << " "
-              << http::HttpStatusCodeToString(resp.get_status_code())
-              << std::endl;
+    LOG((std::string(BOLDWHITE) + http::HttpMethodToString(req.get_method()) +
+         RESET + " " + req.get_uri() + " |> " +
+         std::to_string((int)resp.get_status_code()) + " " +
+         http::HttpStatusCodeToString(resp.get_status_code()))
+            .c_str());
 
     input << resp.get_string();
 
@@ -114,8 +124,13 @@ void siweb_server::server_process(int fd, context ctx) {
     }
 
     std::string response = oss.str();
+    DEBUG_INFO("Writing response to client ...");
     write(fd, response.c_str(), response.length());
     close(fd);
+    DEBUG_INFO("Connection closed.");
+    DEBUG_INFO(
+        "-------------------------- END PROCESSING REQUEST "
+        "--------------------------");
 }
 
 int siweb_server::start(int argc, char* argv[]) {
@@ -134,6 +149,7 @@ int siweb_server::start(int argc, char* argv[]) {
     hints.ai_family = AF_INET;       /* IPv4 */
     hints.ai_socktype = SOCK_STREAM; /* TCP socket */
 
+    DEBUG_INFO("Getting address info ...");
     s = getaddrinfo(NULL, argv[1], &hints, &result);
     if (s != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
@@ -153,29 +169,31 @@ int siweb_server::start(int argc, char* argv[]) {
         int option = 1;
         if (setsockopt(sfd, SOL_SOCKET, SO_REUSEPORT, (char*)&option,
                        sizeof(option)) < 0) {
-            fprintf(stderr, "Setsockopt() failed\n");
+            DEBUG_ERROR("Setsockopt() failed");
             close(sfd);
             exit(1);
         }
 
-        if (bind(sfd, rp->ai_addr, rp->ai_addrlen) == 0)
+        if (bind(sfd, rp->ai_addr, rp->ai_addrlen) == 0) {
+            DEBUG_INFO("Bound to socket");
             break; /* Success */
+        }
 
         close(sfd);
     }
 
     if (rp == NULL) { /* No address succeeded */
-        fprintf(stderr, "Could not bind\n");
+        DEBUG_ERROR("Could not bind");
         exit(EXIT_FAILURE);
     }
 
     freeaddrinfo(result); /* No longer needed */
 
     if ((listen(sfd, 5)) != 0) {
-        fprintf(stderr, "Listen failed ... \n");
+        DEBUG_ERROR("Listen failed ... ");
         exit(0);
     } else {
-        printf("Listening on port %s ... \n", argv[1]);
+        LOG("Listening ...");
     }
 
     install_childterm_signal();

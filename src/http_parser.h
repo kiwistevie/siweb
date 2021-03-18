@@ -8,22 +8,26 @@
 
 namespace siweb::http {
 class http_parser {
-    using header_map = std::map<std::string, std::string>;
-
    public:
+    using string_map = std::map<std::string, std::string>;
+
     void parse(const std::string& input);
-    inline const header_map& get_headers() const { return headers; }
-    inline std::string get_body() const noexcept { return body; }
-    inline httpMethod get_method() const noexcept { return method; }
-    inline std::string get_uri() const noexcept { return uri; }
-    inline bool is_message_complete() const noexcept { return state_complete; }
+    const string_map& get_headers() const { return headers; }
+    const string_map& get_parameters() const { return parameters; }
+    std::string get_body() const noexcept { return body; }
+    constexpr httpMethod get_method() const noexcept { return method; }
+    std::string get_uri() const noexcept { return uri; }
+    constexpr bool is_message_complete() const noexcept {
+        return state_complete;
+    }
 
    private:
     std::string input{""};
     int start{0};
     int current{0};
 
-    header_map headers;
+    string_map headers;
+    string_map parameters;
     httpMethod method;
     std::string uri;
     std::string body;

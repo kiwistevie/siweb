@@ -20,11 +20,11 @@ int main(int argc, char* argv[]) {
         [](const request& req) { return req.get_uri() == "/test"; },
         [](const request& req) {
             return response(req.get_body().c_str(), req.get_body().length(),
-                            httpStatusCode::Ok);
+                            httpStatusCode::NotImplemented);
         });
 
     rtr.add_route(std::make_unique<file_route>("/src/", ""));
     rtr.add_route(std::move(rt));
     siweb_server server(rtr);
-    server.start(argc, argv);
+    return server.start(argc, argv);
 }
