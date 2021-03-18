@@ -9,37 +9,28 @@
 namespace siweb::http {
 class response {
    public:
+    response() : response("", "text/plain", httpStatusCode::NotFound) {}
+
     response(siweb::http::httpStatusCode status_code)
-        : status_code(status_code) {
-        set_content_type("text/plain");
-        set_header("Content-Length", "0");
-    }
+        : response("", "text/plain", status_code) {}
 
-    response(const char* chars,
-             int len,
+    response(std::string content,
+             std::string content_type,
              siweb::http::httpStatusCode status_code)
-        : response(status_code) {
-        for (int i = 0; i < len; i++) {
-            this->chars.push_back(chars[i]);
-        }
-        set_header("Content-Length", std::to_string(this->chars.size()));
+        : content{content},
+          content_type{content_type},
+          status_code{status_code} {
+        update_content_length();
     }
 
-    response(std::vector<char>& chars, siweb::http::httpStatusCode status_code)
-        : response(status_code) {
-        this->chars = chars;
-        set_header("Content-Length", std::to_string(this->chars.size()));
+    std::string get_content() const { return content; }
+
+    void set_content(std::string content) {
+        this->content = content;
+        update_content_length();
     }
 
-    std::string get_string() const {
-        std::ostringstream oss;
-        for (auto& ch : chars) {
-            oss << ch;
-        }
-        return oss.str();
-    }
-
-    void set_content_type(const char* content_type) {
+    void set_content_type(std::string content_type) {
         this->content_type = std::string(content_type);
         set_header("Content-Type", this->content_type);
     }
@@ -47,6 +38,9 @@ class response {
     std::string get_content_type() const { return content_type; }
 
     siweb::http::httpStatusCode get_status_code() const { return status_code; }
+    void set_status_code(httpStatusCode status_code) {
+        this->status_code = status_code;
+    }
 
     void set_header(std::string key, std::string value) {
         headers[key] = value;
@@ -59,11 +53,15 @@ class response {
     }
 
    private:
-    std::vector<char> chars;
+    std::string content;
     siweb::http::httpStatusCode status_code;
     std::string content_type;
     std::map<std::string, std::string> headers{{"Server", "SiWeb/0.0.1 (Unix)"},
                                                {"Connection", "Closed"}};
+
+    void update_content_length() {
+        set_header("content-length", std::to_string(content.length()));
+    }
 };
 }  // namespace siweb::http
 

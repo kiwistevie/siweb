@@ -10,16 +10,14 @@
 namespace siweb::http {
 class lambda_route : public route {
     using predicate_t = std::function<bool(const request&)>;
-    using action_t = std::function<response_t(const request&)>;
+    using action_t = std::function<result(const request&)>;
 
    public:
     lambda_route(predicate_t predicate, action_t action)
         : predicate(predicate), action(action) {}
 
     bool is_hit(const request& req) const override { return predicate(req); }
-    response_t operator()(const request& req) const override {
-        return action(req);
-    }
+    result operator()(const request& req) const override { return action(req); }
 
    private:
     predicate_t predicate;

@@ -23,7 +23,7 @@ const char* get_content_type(std::string extension) {
     }
 }
 
-response_t file_route::operator()(const request& req) const {
+result file_route::operator()(const request& req) const {
     const auto& uri = req.get_uri();
     std::string path = this->root_path + uri.substr(this->uri.length());
     if (path.length() > 0) {
@@ -31,12 +31,12 @@ response_t file_route::operator()(const request& req) const {
         if (t.good()) {
             std::string str((std::istreambuf_iterator<char>(t)),
                             std::istreambuf_iterator<char>());
-            auto r = std::make_unique<response>(str.c_str(), str.length(),
-                                                httpStatusCode::Ok);
-            r->set_content_type(get_content_type(get_file_extension(path)));
+            auto r = result(str.c_str());
+            r.set_status_code(httpStatusCode::Ok);
+            r.set_content_type(get_content_type(get_file_extension(path)));
             return r;
         }
     }
 
-    return std::make_unique<response>(httpStatusCode::NotFound);
+    return result("");
 }

@@ -8,7 +8,7 @@
 
 namespace siweb::http {
 using string_map = std::map<std::string, std::string>;
-using response_t = std::unique_ptr<response>;
+using response_t = std::shared_ptr<response>;
 }  // namespace siweb::http
 
 #endif

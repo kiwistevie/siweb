@@ -7,7 +7,7 @@
 #include <vector>
 #include "http.h"
 #include "request.h"
-#include "response.h"
+#include "result.h"
 #include "route.h"
 #include "types.h"
 
@@ -21,10 +21,9 @@ namespace siweb::http {
 class controller {
    public:
     using route_ptr_t = std::shared_ptr<route>;
-    virtual void register_endpoint(
-        httpMethod method,
-        std::string uri,
-        std::function<response_t(const request&)> func);
+    virtual void register_endpoint(httpMethod method,
+                                   std::string uri,
+                                   std::function<result(const request&)> func);
 
     const std::vector<route_ptr_t>& get_routes() const noexcept {
         return routes;

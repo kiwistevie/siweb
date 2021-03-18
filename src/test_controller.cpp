@@ -1,5 +1,7 @@
 #include "test_controller.h"
 
+#include "base64.h"
+
 using namespace siweb::http;
 
 test_controller::test_controller() {
@@ -8,13 +10,10 @@ test_controller::test_controller() {
     REGISTER(test_controller, POST, "/post", post);
 }
 
-response_t test_controller::get(const request& req) {
-    std::string content =
-        req.get_parameter("message").value_or("No Message provided");
-    return std::make_unique<response>(content.c_str(), content.length(),
-                                      httpStatusCode::Ok);
+result test_controller::get(const request& req) {
+    return "Yay";
 }
 
-response_t test_controller::post(const request& req) {
-    return std::make_unique<response>("Posted", 6, httpStatusCode::Ok);
+result test_controller::post(const request& req) {
+    return result("Posted");
 }

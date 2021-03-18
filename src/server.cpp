@@ -110,7 +110,7 @@ void siweb_server::server_process(int fd, context ctx) {
          http::HttpStatusCodeToString(resp->get_status_code()))
             .c_str());
 
-    input << resp->get_string();
+    input << resp->get_content();
 
     std::ostringstream oss;
     oss << "HTTP/1.1 " << (int)resp->get_status_code() << " "
