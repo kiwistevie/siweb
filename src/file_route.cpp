@@ -27,7 +27,7 @@ result file_route::operator()(const request& req) const {
     const auto& uri = req.get_uri();
     std::string path = this->root_path + uri.substr(this->uri.length());
     if (path.length() > 0) {
-        std::ifstream t(path);
+        std::ifstream t(path, std::ios::binary);
         if (t.good()) {
             std::string str((std::istreambuf_iterator<char>(t)),
                             std::istreambuf_iterator<char>());
