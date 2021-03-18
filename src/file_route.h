@@ -8,6 +8,7 @@
 #include "request.h"
 #include "response.h"
 #include "router.h"
+#include "types.h"
 #include "utils.h"
 
 namespace siweb::http {
@@ -17,7 +18,7 @@ class file_route : public route {
         : uri(uri), root_path(root_path) {}
 
     bool is_hit(const request& req) const override;
-    response operator()(const request& req) const override;
+    response_t operator()(const request& req) const override;
 
    private:
     const std::string uri;

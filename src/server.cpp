@@ -13,6 +13,7 @@
 #include "debug.h"
 #include "http_parser.h"
 #include "log.h"
+#include "types.h"
 
 #define MAX_FORKS 16
 #define READ_BUFFER_SIZE 1024
@@ -96,7 +97,8 @@ void siweb_server::server_process(int fd, context ctx) {
     }
 
     DEBUG_INFO("Generating request object ...");
-    request req(parser.get_method(), parser.get_uri(), ctx.ip_addr);
+    request req(parser.get_method(), parser.get_uri(), ctx.ip_addr,
+                parser.get_headers(), parser.get_parameters());
     req.set_body(parser.get_body());
 
     DEBUG_INFO("Routing request and generating response ...");
@@ -104,16 +106,16 @@ void siweb_server::server_process(int fd, context ctx) {
 
     LOG((std::string(BOLDWHITE) + http::HttpMethodToString(req.get_method()) +
          RESET + " " + req.get_uri() + " |> " +
-         std::to_string((int)resp.get_status_code()) + " " +
-         http::HttpStatusCodeToString(resp.get_status_code()))
+         std::to_string((int)resp->get_status_code()) + " " +
+         http::HttpStatusCodeToString(resp->get_status_code()))
             .c_str());
 
-    input << resp.get_string();
+    input << resp->get_string();
 
     std::ostringstream oss;
-    oss << "HTTP/1.1 " << (int)resp.get_status_code() << " "
-        << http::HttpStatusCodeToString(resp.get_status_code()) << std::endl;
-    for (auto& header : resp.get_headers()) {
+    oss << "HTTP/1.1 " << (int)resp->get_status_code() << " "
+        << http::HttpStatusCodeToString(resp->get_status_code()) << std::endl;
+    for (auto& header : resp->get_headers()) {
         oss << header.first << ": " << header.second << std::endl;
     }
 

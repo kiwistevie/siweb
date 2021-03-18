@@ -4,13 +4,12 @@
 #include <sstream>
 #include <string>
 #include "http.h"
+#include "types.h"
 #include "utils.h"
 
 namespace siweb::http {
 class http_parser {
    public:
-    using string_map = std::map<std::string, std::string>;
-
     void parse(const std::string& input);
     const string_map& get_headers() const { return headers; }
     const string_map& get_parameters() const { return parameters; }
