@@ -20,9 +20,8 @@ using namespace siweb::http;
 using namespace siweb::http::middlewares;
 
 int main(int argc, char* argv[]) {
-    const char* rel_path = argc > 2 ? argv[3] : "/";
     router rtr;
-    file_route fr{"/", rel_path};
+    file_route fr{"/", ""};
     rtr.add_route(fr);
     siweb_server server(rtr);
     return server.start(argc, argv);
