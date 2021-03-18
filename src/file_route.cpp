@@ -25,7 +25,7 @@ const char* get_content_type(std::string extension) {
 
 response file_route::operator()(const request& req) const {
     const auto& uri = req.get_uri();
-    std::string path = uri.substr(this->uri.length());
+    std::string path = this->root_path + uri.substr(this->uri.length());
     if (path.length() > 0) {
         std::ifstream t(path);
         if (t.good()) {
