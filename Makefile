@@ -8,6 +8,7 @@ OBJ_FILES := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC_FILES))
 LDFLAGS :=
 CPPFLAGS := -DDEBUG -g
 CXXFLAGS := -MMD
+ARFLAGS  :=
 -include $(OBJ_FILES:.o=.d)
 
 $(PROGRAM): $(OBJ_FILES)
@@ -23,3 +24,6 @@ clean:
 
 run: $(PROGRAM)
 	./$(PROGRAM) $(PORT)
+
+library: $(PROGRAM)
+	ar rvs $<.a $(OBJ_FILES)
