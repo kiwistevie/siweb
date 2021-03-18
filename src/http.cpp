@@ -5,8 +5,16 @@
 using namespace siweb::http;
 
 std::map<std::string, std::string> http::content_type_mappings = {
+    {"", "application/octet-stream"},
     {".html", "text/html"},
+    {".htm", "text/html"},
     {".xml", "application/xml"},
+    {".json", "application/json"},
+    {".png", "image/png"},
+    {".jpg", "image/jpeg"},
+    {".jpeg", "image/jpeg"},
+    {".gif", "image/gif"},
+    {".css", "text/css"},
     {".txt", "text/plain"}};
 
 static std::string removeScope(std::string str) {
