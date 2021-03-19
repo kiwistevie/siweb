@@ -81,7 +81,6 @@ void siweb_server::server_process(int fd, context ctx) {
         "----------------------------");
     int ret;
     char buff[READ_BUFFER_SIZE];
-    std::ostringstream input;
 
     http_parser parser;
     DEBUG_INFO("Reading data from client ...");
@@ -110,8 +109,6 @@ void siweb_server::server_process(int fd, context ctx) {
          http::HttpStatusCodeToString(resp->get_status_code()))
             .c_str());
 
-    input << resp->get_content();
-
     std::ostringstream oss;
     oss << "HTTP/1.1 " << (int)resp->get_status_code() << " "
         << http::HttpStatusCodeToString(resp->get_status_code()) << std::endl;
@@ -121,13 +118,13 @@ void siweb_server::server_process(int fd, context ctx) {
 
     oss << std::endl;
 
-    if (input.str().length() > 0) {
-        oss << input.str();
-    }
-
     std::string response = oss.str();
+    std::string content = resp->get_content();
     DEBUG_INFO("Writing response to client ...");
-    write(fd, response.c_str(), response.length());
+    write(fd, response.data(), response.length());
+    if (content.length() > 0) {
+      write(fd, content.data(), content.length());
+    }
     close(fd);
     DEBUG_INFO("Connection closed.");
     DEBUG_INFO(
