@@ -12,7 +12,6 @@
 #include "context.h"
 #include "debug.h"
 #include "log.h"
-#include "parsing/http_parser.h"
 #include "types.h"
 
 #define READ_BUFFER_SIZE 1024
@@ -82,8 +81,8 @@ void siweb_server::server_process(int fd, context ctx) {
     int ret;
     char buff[READ_BUFFER_SIZE];
 
-    http_parser parser;
     DEBUG_INFO("Reading data from client ...");
+    parser.reset();
     while (true) {
         if ((ret = recv(fd, buff, sizeof(buff), 0)) > 0) {
             parser.parse(std::string(buff, buff + ret));
@@ -91,7 +90,12 @@ void siweb_server::server_process(int fd, context ctx) {
                 break;
             }
         } else {
-            exit(0);
+            DEBUG_INFO("Client closed connection");
+            if (forking) {
+                exit(0);
+            } else {
+                return;
+            }
         }
     }
 
@@ -124,6 +128,12 @@ void siweb_server::server_process(int fd, context ctx) {
     write(fd, response.data(), response.length());
     if (content.length() > 0) {
         write(fd, content.data(), content.length());
+    }
+
+    auto connectionHeader = req.get_header("connection");
+    if (connectionHeader.has_value() &&
+        connectionHeader.value() == "keep-alive") {
+        server_process(fd, ctx);
     }
     close(fd);
     DEBUG_INFO("Connection closed.");

@@ -20,6 +20,21 @@ class http_parser {
         return state_complete;
     }
 
+    void reset() {
+        input.clear();
+        start = 0;
+        current = 0;
+
+        headers.clear();
+        parameters.clear();
+        uri.clear();
+        body.clear();
+
+        state_body = false;
+        state_method_uri = true;
+        state_complete = false;
+    }
+
    private:
     std::string input{""};
     int start{0};

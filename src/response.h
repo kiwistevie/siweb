@@ -56,8 +56,10 @@ class response {
     std::string content;
     siweb::http::httpStatusCode status_code;
     std::string content_type;
-    std::map<std::string, std::string> headers{{"Server", "SiWeb/0.0.1 (Unix)"},
-                                               {"Connection", "Closed"}};
+    std::map<std::string, std::string> headers{
+        {"Server", "SiWeb/0.0.1 (Unix)"},
+        {"Connection", "keep-alive"},
+        {"Keep-Alive", "timeout=5 max=100"}};
 
     void update_content_length() {
         set_header("content-length", std::to_string(content.length()));

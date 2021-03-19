@@ -15,6 +15,7 @@ std::map<std::string, std::string> http::content_type_mappings = {
     {".jpeg", "image/jpeg"},
     {".gif", "image/gif"},
     {".css", "text/css"},
+    {".js", "text/javascript"},
     {".txt", "text/plain"}};
 
 static std::string removeScope(std::string str) {

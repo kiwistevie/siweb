@@ -2,6 +2,7 @@
 #define siweb_server_h
 
 #include "context.h"
+#include "parsing/http_parser.h"
 #include "routing/router.h"
 
 namespace siweb::http {
@@ -20,6 +21,7 @@ class siweb_server {
 
     bool forking{false};
     int fork_limit{16};
+    parsing::http_parser parser;
 };
 }  // namespace siweb::http
 
