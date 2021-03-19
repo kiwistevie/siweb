@@ -25,7 +25,10 @@ const char* get_content_type(std::string extension) {
 }
 
 result file_route::operator()(const request& req) const {
-    const auto& uri = req.get_uri();
+    const auto& tmpUri = req.get_uri();
+    std::string uri = tmpUri.length() > 0 && tmpUri[tmpUri.length() - 1] == '/'
+                          ? "/index.html"
+                          : tmpUri;
     std::string path = this->root_path + uri.substr(this->uri.length());
     if (path.length() > 0) {
         std::ifstream t(path, std::ios::binary);

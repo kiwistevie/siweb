@@ -24,9 +24,6 @@ int main(int argc, char* argv[]) {
     router rtr;
     file_route fr{"/", ""};
     rtr.add_route(fr);
-    basic_auth_middleware auth;
-    auth.add_credential("stefan", "isak");
-    rtr.register_middleware(auth);
     siweb_server server(rtr);
     return server.start(argc, argv);
 }
