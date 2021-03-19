@@ -20,10 +20,12 @@ class file_route : public route {
 
     bool is_hit(const request& req) const override;
     result operator()(const request& req) const override;
+    void set_indexing(bool indexing) { this->indexing = indexing; }
 
    private:
     const std::string uri;
     const std::string root_path;
+    bool indexing{false};
 };
 }  // namespace siweb::http::routing
 
