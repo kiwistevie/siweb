@@ -123,7 +123,7 @@ void siweb_server::server_process(int fd, context ctx) {
     DEBUG_INFO("Writing response to client ...");
     write(fd, response.data(), response.length());
     if (content.length() > 0) {
-      write(fd, content.data(), content.length());
+        write(fd, content.data(), content.length());
     }
     close(fd);
     DEBUG_INFO("Connection closed.");
@@ -198,30 +198,35 @@ int siweb_server::start(int argc, char* argv[]) {
     install_childterm_signal();
 
     while (1) {
-        if (num_forks > MAX_FORKS)
+        if (forking && num_forks > MAX_FORKS)
             continue;
         peer_addr_len = sizeof(struct sockaddr_storage);
         int cfd = accept(sfd, (struct sockaddr*)&peer_addr, &peer_addr_len);
 
-        num_forks++;
-        int p_id = fork();
+        int p_id = 0;
+        if (forking) {
+            num_forks++;
+            p_id = fork();
+        }
 
-        if (p_id < 0) {
+        if (forking && p_id < 0) {
             fprintf(stderr, "Forking failed\n");
             close(cfd);
-        } else if (p_id == 0) {
+        } else if (!forking || p_id == 0) {
             if (cfd == -1) {
                 fprintf(stderr, "Accept error\n");
                 exit(1);
             } else {
-                close(sfd);
+                if (forking)
+                    close(sfd);
                 char hostbuf[255];
                 context ctx{get_ip_str((struct sockaddr*)&peer_addr, hostbuf,
                                        peer_addr_len),
                             (int)get_host_str((struct sockaddr*)&peer_addr)};
                 server_process(cfd, std::move(ctx));
                 close(cfd);
-                exit(0);
+                if (forking)
+                    exit(0);
             }
         } else {
             close(cfd);
