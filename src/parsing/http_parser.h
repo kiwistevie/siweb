@@ -3,11 +3,11 @@
 #include <map>
 #include <sstream>
 #include <string>
-#include "http.h"
-#include "types.h"
-#include "utils.h"
+#include "../http.h"
+#include "../types.h"
+#include "../utils/utils.h"
 
-namespace siweb::http {
+namespace siweb::http::parsing {
 class http_parser {
    public:
     void parse(const std::string& input);
@@ -52,6 +52,6 @@ class http_parser {
     std::string makeString();
     int get_content_length();
 };
-}  // namespace siweb::http
+}  // namespace siweb::http::parsing
 
 #endif

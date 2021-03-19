@@ -2,8 +2,8 @@
 
 using siweb::http::response;
 using siweb::http::response_t;
-using siweb::http::route;
-using siweb::http::router;
+using siweb::http::routing::route;
+using siweb::http::routing::router;
 
 response_t router::route(const request& req) const {
     for (auto& r : routes) {

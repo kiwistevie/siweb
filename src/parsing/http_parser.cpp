@@ -5,9 +5,9 @@
 #include <iomanip>
 #include <iostream>
 #include <vector>
-#include "debug.h"
+#include "../debug.h"
 
-using namespace siweb::http;
+using namespace siweb::http::parsing;
 
 void http_parser::parse(const std::string& input) {
     if (state_complete)

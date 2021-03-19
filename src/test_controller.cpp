@@ -1,6 +1,6 @@
 #include "test_controller.h"
 
-#include "base64.h"
+#include "encoding/base64.h"
 
 using namespace siweb::http;
 

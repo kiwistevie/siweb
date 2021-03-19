@@ -1,7 +1,8 @@
 #include "controller.h"
-#include "lambda_route.h"
+#include "routing/lambda_route.h"
 
 using namespace siweb::http;
+using namespace siweb::http::routing;
 
 void controller::register_endpoint(httpMethod method,
                                    std::string uri,

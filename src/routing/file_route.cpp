@@ -4,6 +4,7 @@
 #include <sstream>
 
 using namespace siweb::http;
+using namespace siweb::http::routing;
 using namespace siweb::utils;
 
 bool file_route::is_hit(const request& req) const {

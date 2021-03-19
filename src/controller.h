@@ -8,7 +8,7 @@
 #include "http.h"
 #include "request.h"
 #include "result.h"
-#include "route.h"
+#include "routing/route.h"
 #include "types.h"
 
 #define CONTROLLER(uri) this->set_uri_prefix((uri))
@@ -20,7 +20,7 @@
 namespace siweb::http {
 class controller {
    public:
-    using route_ptr_t = std::shared_ptr<route>;
+    using route_ptr_t = std::shared_ptr<routing::route>;
     virtual void register_endpoint(httpMethod method,
                                    std::string uri,
                                    std::function<result(const request&)> func);

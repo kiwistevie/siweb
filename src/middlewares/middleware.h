@@ -3,9 +3,9 @@
 
 #include <memory>
 #include <optional>
-#include "request.h"
-#include "response.h"
-#include "types.h"
+#include "../request.h"
+#include "../response.h"
+#include "../types.h"
 
 namespace siweb::http::middlewares {
 class middleware {

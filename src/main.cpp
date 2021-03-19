@@ -8,21 +8,25 @@
 #include "server.h"
 
 #include <memory>
-#include "basic_auth_middleware.h"
-#include "file_route.h"
-#include "lambda_route.h"
+#include "middlewares/basic_auth_middleware.h"
 #include "request.h"
-#include "route.h"
-#include "router.h"
+#include "routing/file_route.h"
+#include "routing/lambda_route.h"
+#include "routing/route.h"
+#include "routing/router.h"
 #include "test_controller.h"
 
 using namespace siweb::http;
+using namespace siweb::http::routing;
 using namespace siweb::http::middlewares;
 
 int main(int argc, char* argv[]) {
     router rtr;
     file_route fr{"/", ""};
     rtr.add_route(fr);
+    basic_auth_middleware auth;
+    auth.add_credential("stefan", "isak");
+    rtr.register_middleware(auth);
     siweb_server server(rtr);
     return server.start(argc, argv);
 }

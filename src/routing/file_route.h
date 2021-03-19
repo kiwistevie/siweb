@@ -4,15 +4,15 @@
 #include <fstream>
 #include <streambuf>
 #include <string>
-#include "http.h"
-#include "request.h"
-#include "response.h"
-#include "result.h"
+#include "../http.h"
+#include "../request.h"
+#include "../response.h"
+#include "../result.h"
+#include "../types.h"
+#include "../utils/utils.h"
 #include "router.h"
-#include "types.h"
-#include "utils.h"
 
-namespace siweb::http {
+namespace siweb::http::routing {
 class file_route : public route {
    public:
     file_route(const char* uri, const char* root_path)
@@ -25,6 +25,6 @@ class file_route : public route {
     const std::string uri;
     const std::string root_path;
 };
-}  // namespace siweb::http
+}  // namespace siweb::http::routing
 
 #endif

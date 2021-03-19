@@ -1,18 +1,18 @@
 #ifndef siweb_router_h
 #define siweb_router_h
 
-#include "controller.h"
-#include "middleware.h"
-#include "request.h"
-#include "response.h"
+#include "../controller.h"
+#include "../middlewares/middleware.h"
+#include "../request.h"
+#include "../response.h"
+#include "../types.h"
 #include "route.h"
-#include "types.h"
 
-namespace siweb::http {
+namespace siweb::http::routing {
 class router {
    public:
     response_t route(const request& req) const;
-    void add_route(siweb::http::route& r) { routes.emplace_back(&r); }
+    void add_route(routing::route& r) { routes.emplace_back(&r); }
 
     void register_controller(const controller& contr) {
         for (auto& rt : contr.get_routes()) {
@@ -25,9 +25,9 @@ class router {
     }
 
    private:
-    std::vector<siweb::http::route*> routes;
-    std::vector<siweb::http::middlewares::middleware*> middlewares;
+    std::vector<routing::route*> routes;
+    std::vector<middlewares::middleware*> middlewares;
 };
-}  // namespace siweb::http
+}  // namespace siweb::http::routing
 
 #endif

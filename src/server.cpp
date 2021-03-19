@@ -11,13 +11,14 @@
 #include "color.h"
 #include "context.h"
 #include "debug.h"
-#include "http_parser.h"
 #include "log.h"
+#include "parsing/http_parser.h"
 #include "types.h"
 
 #define READ_BUFFER_SIZE 1024
 
 using namespace siweb::http;
+using namespace siweb::http::parsing;
 
 extern void server_process(int fd, const context& ctx);
 static void waiter(int pid);

@@ -2,12 +2,12 @@
 #define siweb_server_h
 
 #include "context.h"
-#include "router.h"
+#include "routing/router.h"
 
 namespace siweb::http {
 class siweb_server {
    public:
-    siweb_server(const router& r) : rtr{r} {}
+    siweb_server(const routing::router& r) : rtr{r} {}
     int start(int argc, char* argv[]);
     bool is_forking() const { return forking; }
     void set_forking(bool forking) { this->forking = forking; }
@@ -15,7 +15,7 @@ class siweb_server {
     void set_fork_limit(int fork_limit) { this->fork_limit = fork_limit; }
 
    private:
-    const router& rtr;
+    const routing::router& rtr;
     void server_process(int fd, context ctx);
 
     bool forking{false};

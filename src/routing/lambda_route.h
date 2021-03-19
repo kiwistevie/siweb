@@ -2,12 +2,12 @@
 #define siweb_lambda_route_h
 
 #include <functional>
-#include "request.h"
-#include "response.h"
+#include "../request.h"
+#include "../response.h"
+#include "../types.h"
 #include "route.h"
-#include "types.h"
 
-namespace siweb::http {
+namespace siweb::http::routing {
 class lambda_route : public route {
     using predicate_t = std::function<bool(const request&)>;
     using action_t = std::function<result(const request&)>;
@@ -23,6 +23,6 @@ class lambda_route : public route {
     predicate_t predicate;
     action_t action;
 };
-}  // namespace siweb::http
+}  // namespace siweb::http::routing
 
 #endif
