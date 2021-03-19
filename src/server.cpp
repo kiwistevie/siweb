@@ -114,7 +114,7 @@ void siweb_server::server_process(int fd, context ctx) {
             .c_str());
 
     std::ostringstream oss;
-    oss << "HTTP/1.1 " << (int)resp->get_status_code() << " "
+    oss << "HTTP/1.0 " << (int)resp->get_status_code() << " "
         << http::HttpStatusCodeToString(resp->get_status_code()) << std::endl;
     for (auto& header : resp->get_headers()) {
         oss << header.first << ": " << header.second << std::endl;
@@ -125,16 +125,19 @@ void siweb_server::server_process(int fd, context ctx) {
     std::string response = oss.str();
     std::string content = resp->get_content();
     DEBUG_INFO("Writing response to client ...");
-    write(fd, response.data(), response.length());
-    if (content.length() > 0) {
-        write(fd, content.data(), content.length());
+
+    if (write(fd, response.data(), response.length()) < 0) {
+        DEBUG_ERROR("Failed to write response.");
+        return;
     }
 
-    auto connectionHeader = req.get_header("connection");
-    if (connectionHeader.has_value() &&
-        connectionHeader.value() == "keep-alive") {
-        server_process(fd, ctx);
+    if (content.length() > 0) {
+        if (write(fd, content.data(), content.length()) < 0) {
+            DEBUG_ERROR("Failed to write response.");
+            return;
+        }
     }
+
     close(fd);
     DEBUG_INFO("Connection closed.");
     DEBUG_INFO(
