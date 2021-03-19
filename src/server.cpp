@@ -188,6 +188,10 @@ int siweb_server::start(int argc, char* argv[]) {
 
     freeaddrinfo(result); /* No longer needed */
 
+    if (forking) {
+        DEBUG_WARN("Forking is enabled - no shared memory between requests!");
+    }
+
     if ((listen(sfd, 5)) != 0) {
         DEBUG_ERROR("Listen failed ... ");
         exit(0);

@@ -12,7 +12,12 @@ void debug_info(std::string str) {
               << std::endl;
 }
 
-void debug_error(const char* str) {
+void debug_warn(std::string str) {
+    std::cout << "[ " << BOLDYELLOW << "WARN " << RESET << " ] " << str
+              << std::endl;
+}
+
+void debug_error(std::string str) {
     std::cout << "[ " << BOLDRED << "ERROR" << RESET << " ] " << str
               << std::endl;
 }

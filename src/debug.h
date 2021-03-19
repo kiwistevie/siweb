@@ -7,11 +7,13 @@
 
 #ifdef DEBUG
 #define DEBUG_INFO(str) debug_info((str))
+#define DEBUG_WARN(str) debug_warn((str))
 #define DEBUG_ERROR(str) debug_error((str))
 #define DEBUG_STR_MAP(header, strmap) debug_str_map((header), (strmap))
 #define DEBUG_NEWLINE() debug_newline()
 #else
 #define DEBUG_INFO(str)
+#define DEBUG_WARN(str)
 #define DEBUG_ERROR(str)
 #define DEBUG_STR_MAP(header, strmap)
 #define DEBUG_NEWLINE()
@@ -19,7 +21,8 @@
 
 void debug_newline();
 void debug_info(std::string str);
-void debug_error(const char* str);
+void debug_warn(std::string str);
+void debug_error(std::string str);
 void debug_str_map(const char* header,
                    std::map<std::string, std::string> stringMap);
 
