@@ -15,7 +15,6 @@
 #include "log.h"
 #include "types.h"
 
-#define MAX_FORKS 16
 #define READ_BUFFER_SIZE 1024
 
 using namespace siweb::http;
@@ -190,6 +189,7 @@ int siweb_server::start(int argc, char* argv[]) {
 
     if (forking) {
         DEBUG_WARN("Forking is enabled - no shared memory between requests!");
+        DEBUG_INFO("Fork limit: " + std::to_string(fork_limit));
     }
 
     if ((listen(sfd, 5)) != 0) {
@@ -202,7 +202,7 @@ int siweb_server::start(int argc, char* argv[]) {
     install_childterm_signal();
 
     while (1) {
-        if (forking && num_forks > MAX_FORKS)
+        if (forking && num_forks > fork_limit)
             continue;
         peer_addr_len = sizeof(struct sockaddr_storage);
         int cfd = accept(sfd, (struct sockaddr*)&peer_addr, &peer_addr_len);
