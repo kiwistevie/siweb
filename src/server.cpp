@@ -15,6 +15,12 @@
 #include "types.h"
 
 #define READ_BUFFER_SIZE 1024
+#define LOG_REQUEST_START                              \
+    "---------------------------- PROCESSING REQUEST " \
+    "----------------------------"
+#define LOG_REQUEST_END                                  \
+    "-------------------------- END PROCESSING REQUEST " \
+    "--------------------------"
 
 using namespace siweb::http;
 using namespace siweb::http::parsing;
@@ -74,15 +80,55 @@ static void waiter(int pid) {
     num_forks--;
 }
 
+const std::string siweb_server::create_header(const response& response) {
+    std::ostringstream oss;
+    oss << "HTTP/" << this->HTTP_VERSION << " ";
+    oss << (int)response.get_status_code()
+        << http::HttpStatusCodeToString(response.get_status_code());
+    oss << std::endl;
+    for (auto& header : response.get_headers()) {
+        oss << header.first << ": " << header.second << std::endl;
+    }
+    oss << std::endl;
+    return oss.str();
+}
+
+bool siweb_server::send_response(int fd,
+                                 const std::string& headers,
+                                 const std::string& content) {
+    if (write(fd, headers.data(), headers.length()) < 0) {
+        DEBUG_ERROR("Failed to write header response.");
+        return false;
+    }
+
+    if (content.length() > 0) {
+        if (write(fd, content.data(), content.length()) < 0) {
+            DEBUG_ERROR("Failed to write content response.");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void siweb_server::log_request(const request& request,
+                               const response& response) {
+    LOG((std::string(BOLDWHITE) +
+         http::HttpMethodToString(request.get_method()) + RESET + " " +
+         request.get_uri() + " |> " +
+         std::to_string((int)response.get_status_code()) + " " +
+         http::HttpStatusCodeToString(response.get_status_code()))
+            .c_str());
+}
+
 void siweb_server::server_process(int fd, context ctx) {
-    DEBUG_INFO(
-        "---------------------------- PROCESSING REQUEST "
-        "----------------------------");
+    DEBUG_INFO(LOG_REQUEST_START);
     int ret;
     char buff[READ_BUFFER_SIZE];
 
     DEBUG_INFO("Reading data from client ...");
-    parser.reset();
+
+    http_parser parser;
     while (true) {
         if ((ret = recv(fd, buff, sizeof(buff), 0)) > 0) {
             parser.parse(std::string(buff, buff + ret));
@@ -105,44 +151,18 @@ void siweb_server::server_process(int fd, context ctx) {
     req.set_body(parser.get_body());
 
     DEBUG_INFO("Routing request and generating response ...");
-    auto resp = this->rtr.route(req);
 
-    LOG((std::string(BOLDWHITE) + http::HttpMethodToString(req.get_method()) +
-         RESET + " " + req.get_uri() + " |> " +
-         std::to_string((int)resp->get_status_code()) + " " +
-         http::HttpStatusCodeToString(resp->get_status_code()))
-            .c_str());
-
-    std::ostringstream oss;
-    oss << "HTTP/1.0 " << (int)resp->get_status_code() << " "
-        << http::HttpStatusCodeToString(resp->get_status_code()) << std::endl;
-    for (auto& header : resp->get_headers()) {
-        oss << header.first << ": " << header.second << std::endl;
-    }
-
-    oss << std::endl;
-
-    std::string response = oss.str();
+    response_t resp = this->rtr.route(req);
+    log_request(req, *resp);
+    std::string response_headers = create_header(*resp);
     std::string content = resp->get_content();
+
     DEBUG_INFO("Writing response to client ...");
-
-    if (write(fd, response.data(), response.length()) < 0) {
-        DEBUG_ERROR("Failed to write response.");
-        return;
-    }
-
-    if (content.length() > 0) {
-        if (write(fd, content.data(), content.length()) < 0) {
-            DEBUG_ERROR("Failed to write response.");
-            return;
-        }
-    }
+    bool result = send_response(fd, response_headers, content);
 
     close(fd);
     DEBUG_INFO("Connection closed.");
-    DEBUG_INFO(
-        "-------------------------- END PROCESSING REQUEST "
-        "--------------------------");
+    DEBUG_INFO(LOG_REQUEST_END);
 }
 
 int siweb_server::start(int argc, char* argv[]) {
